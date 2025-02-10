@@ -1,0 +1,190 @@
+MORSE_CODE_DICT = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+    'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+    'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..',
+    '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+    '8': '---..', '9': '----.', '0': '-----',
+    ' ': '/'
+}
+
+def decode_morse_code_d(morse_code):
+    words = morse_code.split(' / ')
+    decrypted_message = ''
+    for word in words:
+        letters = word.split()
+        decrypted_word = ''
+        for letter in letters:
+            found = False
+            for key, value in MORSE_CODE_DICT.items():
+                if value == letter:
+                    decrypted_word += key
+                    found = True
+                    break
+            if not found:
+                decrypted_word += letter  # Retain the original Morse code character
+                print("Unidentifiable characters included")
+        decrypted_message += decrypted_word + ' '
+    return decrypted_message.strip()
+
+
+def decode_morse_code_e(input_string):
+    encrypted_message = ''
+    for char in input_string.upper():
+        if char in MORSE_CODE_DICT:
+            encrypted_message += MORSE_CODE_DICT[char] + ' '
+        elif char == ' ':
+            encrypted_message += '/ '
+        else:
+            encrypted_message += char + ' '  # Concatenate
+            print("Unidentifiable characters included")
+    return encrypted_message.strip()
+
+def caesar_cipher_e(text, s):
+    result = ""  # initialize the result string
+
+    # traverse the plain text
+    for i in range(len(text)):
+        char = text[i]
+        if char.isupper():
+            result += chr((ord(char) + s - 65) % 26 + 65)
+        elif char.islower():
+            result += chr((ord(char) + s - 97) % 26 + 97)
+        else:
+            # Non-alphabetic characters are added to the result without modification
+            result += char
+    return result
+
+
+
+def caesar_cipher_d(text, s):
+    result = ""  # initialize the result string
+
+    # traverse the encoded text
+    for i in range(len(text)):
+        char = text[i]
+        if char.isupper():
+            result += chr((ord(char) - s - 65) % 26 + 65)
+        elif char.islower():
+            result += chr((ord(char) - s - 97) % 26 + 97)
+        else:
+            # Non-alphabetic characters are added to the result without modification
+            result += char
+    return result
+
+
+
+def brute_force_caesar(text):
+    # Attempting all possible shifts (0 to 25)
+    for shift in range(26):
+        decoded = caesar_cipher_d(text, shift)
+        print("Shift " + str(shift) + ": " + decoded)
+
+def transposition_cipher_e(message, key):
+    # Calculate the number of rows needed
+    num_rows = (len(message) + key - 1) // key
+
+    # Grid Initialization (empty for now)
+    grid = [['' for _ in range(key)] for _ in range(num_rows)]
+
+    # Filling the grid
+    for i in range(len(message)):
+        char = message[i]
+        row = i // key
+        col = i % key
+        grid[row][col] = char
+
+    # Read off from encrypted_message from the grid column by column
+    encrypted_message = ''
+    for col in range(key):
+        for row in range(num_rows):
+            if grid[row][col] != '':
+                encrypted_message += grid[row][col]
+
+    return encrypted_message
+
+
+
+
+
+def transposition_cipher_d(encrypted_message, key):
+    # Calculate the number of rows needed
+    num_rows = (len(encrypted_message) + key - 1) // key
+
+    # Grid Initialization (empty for now)
+    grid = [['' for columns in range(key)] for rows in range(num_rows)]
+
+    # Fill in the grid
+    index = 0
+    for columns in range(key):
+        for rows in range(num_rows):
+            if index < len(encrypted_message):
+                grid[rows][columns] = encrypted_message[index]
+                index += 1
+
+    # Read off the message from the grid row by row
+    message = ''
+    for rows in grid:
+        message += ''.join(rows)
+
+    return message
+
+choice = input("Would you like to encrypt or decrypt a message?\n Enter either \"encrypt\" or \"decrypt\"\n").lower()
+print(" ")
+print("In what type of code?")
+code_type = input("Enter either: \n 1. Morse_Code \n 2. Caesar_Cipher \n 3. Transposition_Cipher\n").lower()
+print(" ")
+
+if choice == 'encrypt':
+    if code_type == 'Morse_Code' or code_type == '1':
+      message = input("Enter message to encrypt: ")
+      encrypted = decode_morse_code_e(message)
+      print("Encrypted message:", encrypted)
+
+    elif code_type == 'Caesar_Cipher' or code_type == '2':
+      message = input("Enter message to encrypt: ")
+      shift = int(input("Input numbers of letters to shift: "))  # convert the shift value to an integer
+      encrypted = caesar_cipher_e(message, shift)
+      print("Encrypted message:", encrypted)
+
+    elif code_type == 'Transposition Cipher' or code_type == '3':
+      message = input("Enter message to encrypt: ")
+      key = int(input("Enter key: "))  # Convert input to an integer
+      encrypted_text = transposition_cipher_e(message, key)
+      print("Encrypted:", encrypted_text)
+
+    else:
+      print("Invalid code type")
+
+
+
+
+
+elif choice == 'decrypt':
+    if code_type == 'Morse_Code' or code_type == '1':
+      message = input("Enter message to decrypt: ")
+      decrypted = decode_morse_code_d(message)
+      print("Decrypted message:", decrypted)
+
+    elif code_type == 'Caesar_Cipher' or code_type == '2':
+      message = input("Enter message to decrypt: ")
+      bruteforce_check = input("Would you like to decode the message through brute force? \n").lower()
+      if bruteforce_check == 'yes':
+          print("Possible decryptions:")
+          brute_force_caesar(message)
+      if bruteforce_check == 'no':
+          shift = int(input("Input numbers of letters to shift back: "))  # convert the shift value to an integer
+          decrypted = caesar_cipher_d(message, shift)
+          print("Decrypted message:", decrypted)
+
+    elif code_type == 'Transposition Cipher' or code_type == '3':
+      message = input("Enter message to decrypt: ")
+      key = int(input("Enter key: "))  # Convert input to an integer
+      decrypted_text = transposition_cipher_d(message, key)
+      print("Decrypted:", decrypted_text)
+
+    else:
+      print("Invalid code type")
+
+else:
+    print("Invalid choices (either encrypt or decrypt)")
